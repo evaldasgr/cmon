@@ -1,0 +1,42 @@
+#!/bin/bash
+# CPU
+cpu1=($(grep cpu[0-9] /proc/stat | awk '{ usage = $2 + $3 + $4 + $6 + $7 + $8; print usage, usage + $5 }'))
+sleep 1
+cpu2=($(grep cpu[0-9] /proc/stat | awk '{ usage = $2 + $3 + $4 + $6 + $7 + $8; print usage, usage + $5 }'))
+
+echo "[CPU]"
+for (( i=0; i<${#cpu1[@]}; i+=2 )); do
+    usage=$((cpu2[i] - cpu1[i]))
+    total=$((cpu2[i+1] - cpu1[i+1]))
+    percentage=$((100 * usage / total))
+    printf "CPU$((i / 2)) usage:\t$percentage%%\n"
+done
+
+# Memory
+ramAvail=$(($(grep MemAvailable /proc/meminfo | awk '{ print $2 }') / 1024))
+ramTotal=$(($(grep MemTotal /proc/meminfo | awk '{ print $2 }') / 1024))
+ramUsage=$((ramTotal - ramAvail))
+
+swapAvail=$(($(grep SwapFree /proc/meminfo | awk '{ print $2 }') / 1024))
+swapTotal=$(($(grep SwapTotal /proc/meminfo | awk '{ print $2 }') / 1024))
+swapUsage=$((swapTotal - swapAvail))
+
+echo
+echo "[Memory]"
+printf "RAM usage:\t$ramUsage/$ramTotal MiB\n"
+printf "SWAP usage:\t$swapUsage/$swapTotal MiB\n"
+
+# GPU
+# Check if AMDGPU files are available
+[ -f /sys/class/drm/card0/device/gpu_busy_percent ] || exit 0
+[ -f /sys/class/drm/card0/device/mem_info_vram_used ] || exit 0
+[ -f /sys/class/drm/card0/device/mem_info_vram_total ] || exit 0
+
+gpuUsage=$(cat /sys/class/drm/card0/device/gpu_busy_percent)
+vramUsage=$(($(cat /sys/class/drm/card0/device/mem_info_vram_used) / 1024 / 1024))
+vramTotal=$(($(cat /sys/class/drm/card0/device/mem_info_vram_total) / 1024 / 1024))
+
+echo
+echo "[GPU]"
+printf "GPU usage:\t$gpuUsage%%\n"
+printf "VRAM usage:\t$vramUsage/$vramTotal MiB\n"
