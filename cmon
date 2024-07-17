@@ -27,14 +27,15 @@ printf "RAM usage:\t$ramUsage/$ramTotal MiB\n"
 printf "SWAP usage:\t$swapUsage/$swapTotal MiB\n"
 
 # GPU
-# Check if AMDGPU files are available
-[ -f /sys/class/drm/card0/device/gpu_busy_percent ] || exit 0
-[ -f /sys/class/drm/card0/device/mem_info_vram_used ] || exit 0
-[ -f /sys/class/drm/card0/device/mem_info_vram_total ] || exit 0
+# Use first available DRM GPU
+drmPath=/sys/class/drm/card[0-9]
+[ -f $drmPath/device/gpu_busy_percent ] || exit 0
+[ -f $drmPath/device/mem_info_vram_used ] || exit 0
+[ -f $drmPath/device/mem_info_vram_total ] || exit 0
 
-gpuUsage=$(cat /sys/class/drm/card0/device/gpu_busy_percent)
-vramUsage=$(($(cat /sys/class/drm/card0/device/mem_info_vram_used) / 1024 / 1024))
-vramTotal=$(($(cat /sys/class/drm/card0/device/mem_info_vram_total) / 1024 / 1024))
+gpuUsage=$(cat $drmPath/device/gpu_busy_percent)
+vramUsage=$(($(cat $drmPath/device/mem_info_vram_used) / 1024 / 1024))
+vramTotal=$(($(cat $drmPath/device/mem_info_vram_total) / 1024 / 1024))
 
 echo
 echo "[GPU]"
