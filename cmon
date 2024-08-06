@@ -1,10 +1,10 @@
 #!/bin/bash
 # Gather immediate stats
-cpu1=($(grep cpu[0-9] /proc/stat | awk '{ usage = $2 + $3 + $4 + $6 + $7 + $8; print usage, usage + $5 }'))
+cpu1=($(grep cpu[0-9] /proc/stat | awk '{ usage = $2 + $3 + $4 + $7 + $8; print usage, usage + $5 + $6 }'))
 disk1=($(cat /proc/diskstats))
 sleep 1
 
-cpu2=($(grep cpu[0-9] /proc/stat | awk '{ usage = $2 + $3 + $4 + $6 + $7 + $8; print usage, usage + $5 }'))
+cpu2=($(grep cpu[0-9] /proc/stat | awk '{ usage = $2 + $3 + $4 + $7 + $8; print usage, usage + $5 + $6 }'))
 disk2=($(cat /proc/diskstats))
 
 # CPU
